@@ -1,6 +1,10 @@
 package com.redo.production.myroute;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.location.Location;
+import android.os.Build;
+import android.os.CountDownTimer;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +20,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DecimalFormat;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.acos;
 import static java.lang.Math.toRadians;
+
+
+@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+@SuppressLint("NewApi")
+
+
 
 public class MapsActivity extends FragmentActivity {
 
@@ -34,6 +45,10 @@ public class MapsActivity extends FragmentActivity {
         txvDistance=(TextView) findViewById(R.id.txvDistance);
         txvSpeed=(TextView) findViewById(R.id.txvSpeed);
         txvTimeLeft =(TextView) findViewById(R.id.txvTimeLeft);
+
+
+        final CounterClass timer = new CounterClass(120000,1000);
+        timer.start();
 
     }
 
@@ -125,5 +140,35 @@ public class MapsActivity extends FragmentActivity {
 
         }
 
+    }
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    @SuppressLint("NewApi")
+    public class CounterClass extends CountDownTimer
+    {
+
+        public CounterClass(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+
+        @SuppressLint("NewApi")
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            long millis = millisUntilFinished;
+            String hms = String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis) -
+                    TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+            txvTimeLeft.setText(hms);
+        }
+
+        @Override
+        public void onFinish() {
+
+        }
     }
 }
