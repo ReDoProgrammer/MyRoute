@@ -93,7 +93,11 @@ public class MapsActivity extends FragmentActivity {
                         mMap.addMarker(new MarkerOptions().position(startPoint).title("Started point"));
                     }
 
-
+                    LatLng prePoint=null;
+                    if(currentPoint!=null)
+                        prePoint=currentPoint;
+                    else
+                        prePoint=startPoint;
                     //updating current location
                     currentPoint =  new LatLng(arg0.getLatitude(), arg0.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(currentPoint).title("Current point"));
@@ -112,8 +116,8 @@ public class MapsActivity extends FragmentActivity {
 
                     //update distance
 
-                    distance=getDistance(startPoint,currentPoint);
-                    txvDistance.setText(Double.toString(distance));
+                    distance+=getDistance(prePoint, currentPoint);
+                    txvDistance.setText(Double.toString(distance)+"m");
 
 
                 }
