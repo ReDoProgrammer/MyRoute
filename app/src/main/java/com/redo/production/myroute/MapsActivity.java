@@ -2,7 +2,9 @@ package com.redo.production.myroute;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.support.v4.app.FragmentActivity;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -18,8 +21,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.acos;
@@ -31,12 +36,19 @@ import static java.lang.Math.toRadians;
 
 
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private LatLng startPoint=null,currentPoint;
     TextView txvDistance,txvSpeed,txvTimeLeft;
-    double distance=0;
+    long distance=0;
+    long count=0;
+    double speed=0;
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +62,11 @@ public class MapsActivity extends FragmentActivity {
         final CounterClass timer = new CounterClass(120000,1000);
         timer.start();
 
+
+        //Thread thread = new Thread(new Timer());
+        //thread.start();
+
+
     }
 
 
@@ -62,17 +79,18 @@ public class MapsActivity extends FragmentActivity {
     }
 
 
-    public  void onReset(View v)
-    {
-        currentPoint=null;
+    public  void onReset(View v)    {
+        mMap.clear();
+        distance = 0;
+        txvDistance.setText(Long.toString(distance));
+
+        currentPoint = null;
         txvSpeed.setText("0asf");
         txvTimeLeft.setText("aba");
-        txvDistance.setText("hoho");
     }
 
 
-    public double getDistance(LatLng fP, LatLng lP)
-    {
+    public double getDistance(LatLng fP, LatLng lP)    {
         double l1 = toRadians(fP.latitude);
         double l2 = toRadians(lP.latitude);
         double g1 = toRadians(fP.longitude);
@@ -96,11 +114,12 @@ public class MapsActivity extends FragmentActivity {
             mMap.setMyLocationEnabled(true);
         }
 
-
         if (mMap != null) {
             mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                 @Override
                 public void onMyLocationChange(Location arg0) {
+
+
                     //check startPoint is set or not?
                     if(startPoint==null)
                     {
@@ -108,16 +127,22 @@ public class MapsActivity extends FragmentActivity {
                         mMap.addMarker(new MarkerOptions().position(startPoint).title("Started point"));
                     }
 
-                    LatLng prePoint=null;
+                    LatLng prePoint;
                     if(currentPoint!=null)
                         prePoint=currentPoint;
                     else
                         prePoint=startPoint;
-                    //updating current location
-                    currentPoint =  new LatLng(arg0.getLatitude(), arg0.getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(currentPoint).title("Current point"));
 
 
+                    //updating current Position
+                    currentPoint = new LatLng(arg0.getLatitude(),arg0.getLongitude());
+
+                    //Draw route
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                                                        .add(prePoint)
+                                                        .add(currentPoint)
+                                                        .width(10).color(Color.BLUE).geodesic(true);
+                    mMap.addPolyline(polylineOptions);
 
 
                     //set camera
@@ -128,23 +153,44 @@ public class MapsActivity extends FragmentActivity {
                             CameraUpdateFactory.newCameraPosition(currentPos));
 
 
-
                     //update distance
-
                     distance+=getDistance(prePoint, currentPoint);
-                    txvDistance.setText(Double.toString(distance)+"m");
+                    txvDistance.setText(Double.toString(distance) + "m");
 
+
+                    //get current speed
+                    speed = arg0.getSpeed();
+                    txvSpeed.setText(Double.toString(speed)+ "km/h");
 
                 }
             });
 
         }
 
+
     }
+
+
+    public class Timer implements Runnable
+    {
+
+        @Override
+        public void run() {
+            count++;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            txvTimeLeft.setText(Long.toString(count));
+        }
+    }
+
+
+
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @SuppressLint("NewApi")
-    public class CounterClass extends CountDownTimer
-    {
+    public class CounterClass extends CountDownTimer    {
 
         public CounterClass(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
@@ -155,9 +201,8 @@ public class MapsActivity extends FragmentActivity {
         @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 
         @Override
-        public void onTick(long millisUntilFinished) {
-            long millis = millisUntilFinished;
-            String hms = String.format("%02d:%02d:%02d",
+        public void onTick(long millis) {
+           String hms = String.format("%02d:%02d:%02d",
                     TimeUnit.MILLISECONDS.toHours(millis),
                     TimeUnit.MILLISECONDS.toMinutes(millis) -
                     TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
@@ -171,4 +216,6 @@ public class MapsActivity extends FragmentActivity {
 
         }
     }
+
+
 }

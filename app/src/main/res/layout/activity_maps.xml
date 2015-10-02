@@ -7,6 +7,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        >
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/btnReset"
+            android:onClick="onReset"
+            android:gravity="center"
+            android:background="@drawable/btn_restart"
+            android:layout_marginRight="10dp" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/btnSave"
+            android:onClick="onSave"
+            android:background="@drawable/btn_save"
+            android:layout_marginRight="10dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="5dp"
         android:minWidth="100dp">
@@ -79,14 +102,7 @@
 
     </LinearLayout>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reset"
-        android:id="@+id/btnReset"
-        android:onClick="onReset"
-        android:gravity="center" />
+
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
